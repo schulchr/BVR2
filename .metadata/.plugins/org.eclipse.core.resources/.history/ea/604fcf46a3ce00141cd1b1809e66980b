@@ -1,0 +1,45 @@
+package com.example.bvr;
+
+//A class to hold all the shader handles 
+public class Handles {
+	/** This will be used to pass in the transformation matrix. */
+	int mMVPMatrixHandle;
+	
+	/** This will be used to pass in the modelview matrix. */
+	int mMVMatrixHandle;
+	
+	/** This will be used to pass in the modelmatrix. */
+	int mMMatrixHandle;
+	
+	/** This will be used to pass in the modelmatrix. */
+	int mVPMatrixHandle;
+	
+	/** This will be used to pass in the light position. */
+	int mLightPosHandle;
+	
+	/** This will be used to pass in the texture. */
+	int mTextureUniformHandle[];
+	
+	/** This will be used to pass in model position information. */
+	int mPositionHandle;
+	
+	/** This will be used to pass in model normal information. */
+	int mNormalHandle;
+	
+	/** This will be used to pass in model texture coordinate information. */
+	int mTextureCoordinateHandle;
+	
+	/** This is a handle to our cube shading program. */
+	int mProgramHandle;
+	
+	/** These are handles to our texture data. */
+	int mAndroidDataHandle[] = new int[8];	
+	
+	/** This will be used to pass in model slider information. */
+	int mAlphaHandle;
+	int mMinHandle;
+	int mMaxHandle;
+	int mDistHandle;
+	int mStepsHandle;
+	int mZoomHandle;	
+}

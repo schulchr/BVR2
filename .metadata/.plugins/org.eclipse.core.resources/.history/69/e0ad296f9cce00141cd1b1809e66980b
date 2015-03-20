@@ -1,0 +1,23 @@
+package com.example.bvr;
+
+import android.content.Context;
+import android.opengl.GLSurfaceView;
+
+public class GridGLSurfaceView extends GLSurfaceView {
+
+	public GridGLSurfaceView(Context context) {
+		super(context);
+		// TODO Auto-generated constructor stub
+	}
+
+	public void onPause() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void onResume() {
+		// TODO Auto-generated method stub
+		
+	}
+
+}

@@ -1,0 +1,99 @@
+package com.example.bvr;
+
+import java.util.concurrent.ExecutorService;
+
+import android.opengl.GLSurfaceView;
+
+public class GridRenderer {
+	Matrix matrices = new Matrix();
+	Handles handles = new Handles();
+	GridState gridState = new GridState();
+	//References to the activity and the surface view
+	private static GridActivity mGridActivity;
+	private final GLSurfaceView mGlSurfaceView;
+		
+	/** Used for debug logs. */
+	private static final String TAG = "GridRenderer";
+	
+
+
+
+	
+	/** Additional info for cube generation. */
+	private int mLastRequestedCubeFactor;
+	private int mActualCubeFactor;
+	
+	/** Control whether vertex buffer objects or client-side memory will be used for rendering. */
+	private boolean mUseVBOs = true;	
+	
+	/** Control whether strides will be used. */
+	private boolean mUseStride = true;
+	
+	/** Size of the position data in elements. */
+	static final int POSITION_DATA_SIZE = 3;	
+	
+	/** Size of the normal data in elements. */
+	static final int NORMAL_DATA_SIZE = 3;
+	
+	/** Size of the texture coordinate data in elements. */
+	static final int TEXTURE_COORDINATE_DATA_SIZE = 2;
+	
+	/** How many bytes per float. */
+	static final int BYTES_PER_FLOAT = 4;	
+	
+	/** Used to hold a light centered on the origin in model space. We need a 4th coordinate so we can get translations to work when
+	 *  we multiply this by our transformation matrices. */
+	private final float[] mLightPosInModelSpace = new float[] {0.0f, 0.0f, 0.0f, 1.0f};
+	
+	/** Used to hold the current position of the light in world space (after transformation via model matrix). */
+	private final float[] mLightPosInWorldSpace = new float[4];
+	
+	/** Used to hold the transformed position of the light in eye space (after transformation via modelview matrix) */
+	private final float[] mLightPosInEyeSpace = new float[4];
+	
+
+	/** These are handles to our texture data. */
+	private int mAndroidDataHandle[] = new int[8];		
+	
+	// These still work without volatile, but refreshes are not guaranteed to happen.					
+	public volatile float mDeltaX;					
+	public volatile float mDeltaY;	
+	
+	/** Thread executor for generating cube data in the background. */
+	private final ExecutorService mSingleThreadedExecutor = Executors.newSingleThreadExecutor();
+	
+	/** The current cubes object. */
+	private Cubes mCubes;
+	
+	
+	/** Filename of data to be read in */
+	private static String mFilename;
+	
+	/** This will be used to pass in model slider information. */
+	private int mAlphaHandle;
+	private int mMinHandle;
+	private int mMaxHandle;
+	private int mDistHandle;
+	private int mStepsHandle;
+	private int mZoomHandle;
+	private int mLightHandle;
+	
+	/**
+	 * values that are passed into the shader
+	 */
+	private static float mAlpha = 1.0f;
+	private static float mMin = 0.0f;
+	private static float mMax = 1.0f;
+	private static float mSteps = 100.0f;
+	private static float mDist  = 100.0f;
+	private static float mZoom = 1.0f;
+	private static float mLight = 0.0f;
+
+	
+	
+	
+	public GridRenderer(final GridActivity gridActivity, final GLSurfaceView glSurfaceView) {
+		mGridActivity = gridActivity;	
+		mGlSurfaceView = glSurfaceView;
+	}
+}

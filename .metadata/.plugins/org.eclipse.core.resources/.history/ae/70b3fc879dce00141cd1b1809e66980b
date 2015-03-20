@@ -1,0 +1,6 @@
+package com.example.bvr;
+
+//A class to hold all the shader handles 
+public class Handles {
+
+}

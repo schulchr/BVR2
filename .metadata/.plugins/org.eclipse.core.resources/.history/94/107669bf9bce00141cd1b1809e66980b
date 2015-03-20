@@ -1,0 +1,15 @@
+package com.example.bvr;
+
+public class GridGLSurfaceView {
+
+	public void onPause() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void onResume() {
+		// TODO Auto-generated method stub
+		
+	}
+
+}
