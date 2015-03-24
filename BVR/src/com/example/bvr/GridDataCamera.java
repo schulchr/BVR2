@@ -2,7 +2,7 @@ package com.example.bvr;
 
 public class GridDataCamera {
 	float[] loc = new float[3]; //location of the camera
-	float[] dir = new float[3]; //direction that the camera is looking at
+	float[] dir = new float[4]; //direction that the camera is looking at
 	
 	//View volume information of the camera
 	float far, near;
@@ -17,12 +17,12 @@ public class GridDataCamera {
 	
 	public GridDataCamera(float f, float n, float l, float r, float t, float b)
 	{
-		loc[0] = 0;
-		loc[1] = 0;
-		loc[2] = 1;
+		loc[0] =  0;
+		loc[1] =  0;
+		loc[2] =  1;
 		
-		dir[0] = 0;
-		dir[1] = 0;
+		dir[0] =  0;
+		dir[1] =  0;
 		dir[2] = -1;
 		
 		far = f;
@@ -62,11 +62,11 @@ public class GridDataCamera {
 	/**
 	 * Will update the view volume for the current view. 
 	 */
+	float[] perpDirY = new float[3];
+	float[] perpDirX = new float[3];
 	public void updateViewVolume()
 	{
-		float[] perpDirY = new float[3];
-		float[] perpDirZ = new float[3];
-		
+				
 		//4 vertices that describe the view volume
 		float[] b = new float[3];
 		float[] d = new float[3];
@@ -84,27 +84,27 @@ public class GridDataCamera {
 		up[1] = 1;
 		up[2] = 0;
 		
-		perpDirZ = crossProd(up, dir);
-		perpDirY = crossProd(dir,perpDirZ);
+		perpDirX = crossProd(up, dir);
+		perpDirY = crossProd(dir,perpDirX);
 		
 		//update the 4 points that define the view volume
 		//Consult the notebook to get a better visual representation of what's going on
 		
-		a[0] = loc[0] + dir[0] * near + perpDirZ[0] * left + -perpDirY[0] * bottom;
-		a[1] = loc[1] + dir[1] * near + perpDirZ[1] * left + -perpDirY[1] * bottom;
-		a[2] = loc[2] + dir[2] * near + perpDirZ[2] * left + -perpDirY[2] * bottom;
+		a[0] = loc[0] + dir[0] * near + perpDirX[0] * left + -perpDirY[0] * bottom;
+		a[1] = loc[1] + dir[1] * near + perpDirX[1] * left + -perpDirY[1] * bottom;
+		a[2] = loc[2] + dir[2] * near + perpDirX[2] * left + -perpDirY[2] * bottom;
 		
-		b[0] = loc[0] + dir[0] * far + perpDirZ[0] * left + -perpDirY[0] * bottom;
-		b[1] = loc[1] + dir[1] * far + perpDirZ[1] * left + -perpDirY[1] * bottom;
-		b[2] = loc[2] + dir[2] * far + perpDirZ[2] * left + -perpDirY[2] * bottom;
+		b[0] = loc[0] + dir[0] * far + perpDirX[0] * left + -perpDirY[0] * bottom;
+		b[1] = loc[1] + dir[1] * far + perpDirX[1] * left + -perpDirY[1] * bottom;
+		b[2] = loc[2] + dir[2] * far + perpDirX[2] * left + -perpDirY[2] * bottom;
 		
-		d[0] = loc[0] + dir[0] * near - perpDirZ[0] * right + -perpDirY[0] * bottom;
-		d[1] = loc[1] + dir[1] * near - perpDirZ[1] * right + -perpDirY[1] * bottom;
-		d[2] = loc[2] + dir[2] * near - perpDirZ[2] * right + -perpDirY[2] * bottom;
+		d[0] = loc[0] + dir[0] * near - perpDirX[0] * right + -perpDirY[0] * bottom;
+		d[1] = loc[1] + dir[1] * near - perpDirX[1] * right + -perpDirY[1] * bottom;
+		d[2] = loc[2] + dir[2] * near - perpDirX[2] * right + -perpDirY[2] * bottom;
 		
-		e[0] = loc[0] + dir[0] * near + perpDirZ[0] * left + perpDirY[0] * top;
-		e[1] = loc[1] + dir[1] * near + perpDirZ[1] * left + perpDirY[1] * top;
-		e[2] = loc[2] + dir[2] * near + perpDirZ[2] * left + perpDirY[2] * top;
+		e[0] = loc[0] + dir[0] * near + perpDirX[0] * left + perpDirY[0] * top;
+		e[1] = loc[1] + dir[1] * near + perpDirX[1] * left + perpDirY[1] * top;
+		e[2] = loc[2] + dir[2] * near + perpDirX[2] * left + perpDirY[2] * top;
 		
 		//Create the 3 vectors defining the volume
 		ab[0] = b[0] - a[0];
@@ -124,16 +124,60 @@ public class GridDataCamera {
 	/**
 	 * Will update the location of the camera and also make the direction point to the center, for now.
 	 */
-	public void updateLocation(float x, float y, float z)
+	public void updateLocationForward(float factor)
 	{
-		loc[0] = x;
-		loc[1] = y;
-		loc[2] = z;
+		float dx, dy ,dz; 
 		
-		dir[0] = 0 - x;
-		dir[1] = 0 - y;
-		dir[2] = 0 - z;
+		dx = dir[0] * factor + loc[0];
+		if(dx > 1)
+			dx = 1.0f;
+		if(dx < -1)
+			dx = -1.0f;
+		
+		dy = dir[1] * factor + loc[1];
+		if(dy > 1)
+			dy = 1.0f;
+		if(dy < -1)
+			dy = -1.0f;
+		
+		dz = dir[2] * factor + loc[2];
+		if(dz > 1)
+			dz = 1.0f;
+		if(dz < -1)
+			dz = -1.0f;
+		
+		loc[0] = dx;
+		loc[1] = dy;
+		loc[2] = dz;
+		
 	}
+	public void updateLocationRight(float factor)
+	{
+		float dx, dy ,dz; 
+		
+		dx = perpDirX[0] * factor + loc[0];
+		if(dx > 1)
+			dx = 1.0f;
+		if(dx < -1.0f)
+			dx = -1.0f;
+		
+		dy = perpDirX[1] * factor + loc[1];
+		if(dy > 1)
+			dy = 1.0f;
+		if(dy < -1)
+			dy = -1.0f;
+		
+		dz = perpDirX[2] * factor + loc[2];
+		if(dz > 1)
+			dz = 1.0f;
+		if(dz < -1)
+			dz = -1.0f;
+		
+		loc[0] = dx;
+		loc[1] = dy;
+		loc[2] = dz;
+	}
+	
 	
 	/**
 	 * Updates the direction that the camera is looking at.

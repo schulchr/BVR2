@@ -20,6 +20,7 @@ import android.opengl.EGLConfig;
 import android.opengl.GLES30;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
+import android.widget.TextView;
 
 /**
  * This class implements our custom renderer. Note that the GL10 parameter
@@ -40,9 +41,9 @@ public class GridRenderer implements GLSurfaceView.Renderer {
 	static GridGridpoint[] gridPoints;
 	static int gridWidth, gridHeight, gridDepth;
 	static int gridTexWidth, gridTexHeight, gridTexDepth;
-	static GridDataCamera gridCamera;
+	GridDataCamera gridCamera;
 	static int loadedTextures[];
-	static int loadedPoint = -100;
+	int loadedPoint = -100;
 	static int radius;
 	static float gridUsed = 0.0f;
 	/**
@@ -77,7 +78,7 @@ public class GridRenderer implements GLSurfaceView.Renderer {
 	
 	/** A temporary matrix. */
 	private float[] mTemporaryMatrix = new float[16];
-	
+	private float[] mTemporaryInvMatrix = new float[16];
 	/** 
 	 * Stores a copy of the model matrix specifically for the light position.
 	 */
@@ -464,9 +465,12 @@ public class GridRenderer implements GLSurfaceView.Renderer {
 		//Matrix.perspectiveM(mProjectionMatrix, 0, 90, ratio, near, far);
 	}	
 
+	long startTime = System.nanoTime();
+	int frames = 0;
 	@Override
 	public void onDrawFrame(GL10 glUnused) 
 	{		
+		
 		GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT | GLES30.GL_DEPTH_BUFFER_BIT);			                                    
         
         // Set our per-vertex lighting program.
@@ -525,7 +529,14 @@ public class GridRenderer implements GLSurfaceView.Renderer {
     	// Multiply the current rotation by the accumulated rotation, and then set the accumulated rotation to the result.
     	Matrix.multiplyMM(mTemporaryMatrix, 0, mCurrentRotation, 0, mAccumulatedRotation, 0);
     	System.arraycopy(mTemporaryMatrix, 0, mAccumulatedRotation, 0, 16);
-    	    	
+    	
+    	//Get the camera direction by multiplying the inverse rotation matrix by the camera direction, which is fixed at (0, 0, -1)
+    	Matrix.invertM(mTemporaryInvMatrix, 0, mAccumulatedRotation, 0);
+    	
+    	float[] cameraDir = {0.0f, 0.0f, -1.0f, 0.0f};
+    	
+    	Matrix.multiplyMV(gridCamera.dir, 0, mTemporaryInvMatrix, 0, cameraDir, 0);    	
+    	
         // Rotate the cube taking the overall rotation into account.     	
     	Matrix.multiplyMM(mTemporaryMatrix, 0, mModelMatrix, 0, mAccumulatedRotation, 0);
     	System.arraycopy(mTemporaryMatrix, 0, mModelMatrix, 0, 16);   
@@ -612,6 +623,10 @@ public class GridRenderer implements GLSurfaceView.Renderer {
 		if (mCubes != null) {
 			mCubes.render();
 		}
+		
+		
+		//for FPS calculation
+		frames++;
 	}		
 	
 	abstract class Cubes {
@@ -1147,6 +1162,8 @@ public class GridRenderer implements GLSurfaceView.Renderer {
     	else
     		dx = 0;
     	
+    	TextView tv = (TextView) mGridActivity.findViewById(R.id.valueText);
+    	
     	if(alphaTog)
     	{
     		mAlpha += dx;
@@ -1160,6 +1177,8 @@ public class GridRenderer implements GLSurfaceView.Renderer {
     		{
     			mAlpha = 1.0f;
     		}
+    		
+    		tv.setText(Float.toString(mAlpha));
     	}
     	
     	if(minTog)
@@ -1175,6 +1194,8 @@ public class GridRenderer implements GLSurfaceView.Renderer {
     		{
     			mMin = 1;
     		}
+    		
+    		tv.setText(Float.toString(mMin));
     	}
     	
     	if(maxTog)
@@ -1189,7 +1210,7 @@ public class GridRenderer implements GLSurfaceView.Renderer {
     		{
     			mMax = 1;
     		}
-    		
+    		tv.setText(Float.toString(mMax));
     	}
     	
     	if(stepSizeTog)
@@ -1205,7 +1226,7 @@ public class GridRenderer implements GLSurfaceView.Renderer {
     		{
     			mDist = 700;
     		}
-    		
+    		tv.setText(Float.toString(mDist));
     	}
     	
     	if(numStepTog)
@@ -1220,8 +1241,14 @@ public class GridRenderer implements GLSurfaceView.Renderer {
     		{
     			mSteps = 700;
     		}
+    		tv.setText(Float.toString(mSteps));
     	}
     }
+    
+	public void moveGridCamera(int dir)
+	{
+		
+	}
     
     public int loadDownscaled(int type)
     {
@@ -1385,13 +1412,13 @@ public class GridRenderer implements GLSurfaceView.Renderer {
 		readGridFile();
 		
 		//setup grid camera
-		float lengthX = (2.0f) / (float) (gridWidth - 1);
-		float lengthY = (2.0f) / (float) (gridHeight - 1);
-		float lengthZ = (2.0f) / (float) (gridDepth - 1);
+		float lengthX = (1.5f) / (float) (gridWidth - 1);
+		float lengthY = (1.5f) / (float) (gridHeight - 1);
+		float lengthZ = (1.5f) / (float) (gridDepth - 1);
 		//GridDataCamera(float f, float n, float l, float r, float t, float b)
 		gridCamera = new GridDataCamera(1.5f * lengthZ, 0.0f, .5f * lengthX, .5f * lengthX, .75f*lengthY, .75f*lengthY);
 		
-		gridCamera.updateLocation(0, 0, -1);
+		//gridCamera.updateLocation(0, 0, -1);
 		
 		//choose which textures to load in here
 		if(mZoom >= 2.0)

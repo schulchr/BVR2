@@ -137,7 +137,7 @@ float sampleTextures(vec3 tc)
 	
 	
 }
- 
+
 // The entry point for our fragment shader.
 void main()                    		
 {    
@@ -151,10 +151,13 @@ void main()
 	
 	vec3 STP = v_TexCoordinate;
 	
+	//uDirSTP *= noise(STP);
+	
+	
 	vec3 gradient;
 	bool gradFound = false;
 	
-	for(int i = 0; i < int(uNumSteps); i++, STP += uDirSTP)
+	for(int i = 0; i < int(uNumSteps); i++, STP += uDirSTP  )
 	{
 		if(any(lessThan(STP, vec3(0., 0., 0.))))
 			break;

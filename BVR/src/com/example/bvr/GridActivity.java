@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ConfigurationInfo;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.ActionBarActivity;
 import android.util.DisplayMetrics;
 import android.view.View;
@@ -13,6 +14,7 @@ import android.view.View.OnClickListener;
 import android.widget.CheckBox;
 import android.widget.RadioButton;
 import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.Toast;
 
@@ -42,8 +44,27 @@ public class GridActivity extends Activity {
 		mRenderer = new GridRenderer(this, mGLSurfaceView);
 		mGLSurfaceView.setRenderer(mRenderer, displayMetrics.density);
 		mRenderer.setFilename(intent.getStringExtra(MainActivity.EXTRA_MESSAGE));
+		
+		
+		final Handler handler = new Handler();
+		
+		handler.post(new Runnable(){
+			
+			@Override
+			public void run()
+			{
+				setFPS(mRenderer.frames);
+				mRenderer.frames = 0;
+				
+				setGridNum(mRenderer.loadedPoint);
+				
+				handler.postDelayed(this,1000);
+			}
+		});
+		
 	}
 
+	
 	@Override
 	protected void onResume() {
 		// The activity must call the GL surface view's onResume() on activity
@@ -61,65 +82,75 @@ public class GridActivity extends Activity {
 	}
 	
 	public void radioClick(View v)
-	{
-		boolean checked = ((RadioButton) v).isChecked();
-		
+	{		
 		switch(v.getId()){
 			case R.id.alphaButton:
-					findViewById(R.id.rotateButton).setSelected(false);
-					findViewById(R.id.rotateButton).animate();
-					findViewById(R.id.alphaButton).setSelected(true);
-					findViewById(R.id.stepSizeButton).setSelected(false);
-					findViewById(R.id.numStepsButton).setSelected(false);
-					findViewById(R.id.minButton).setSelected(false);
-					findViewById(R.id.maxButton).setSelected(false);	
 					mRenderer.setVariable(0);
 				break;
 			case R.id.stepSizeButton:
-					findViewById(R.id.rotateButton).setSelected(false);
-					findViewById(R.id.alphaButton).setSelected(false);
-					findViewById(R.id.stepSizeButton).setSelected(true);
-					findViewById(R.id.numStepsButton).setSelected(false);
-					findViewById(R.id.minButton).setSelected(false);
-					findViewById(R.id.maxButton).setSelected(false);
 					mRenderer.setVariable(4);
 				break;
 			case R.id.rotateButton:
-					findViewById(R.id.rotateButton).setSelected(true);
-					findViewById(R.id.alphaButton).setSelected(false);
-					findViewById(R.id.stepSizeButton).setSelected(false);
-					findViewById(R.id.numStepsButton).setSelected(false);
-					findViewById(R.id.minButton).setSelected(false);
-					findViewById(R.id.maxButton).setSelected(false);
 					mRenderer.setVariable(1);
 				break;
 			case R.id.numStepsButton:
-					findViewById(R.id.rotateButton).setSelected(false);
-					findViewById(R.id.alphaButton).setSelected(false);
-					findViewById(R.id.stepSizeButton).setSelected(false);
-					findViewById(R.id.numStepsButton).setSelected(true);
-					findViewById(R.id.minButton).setSelected(false);
-					findViewById(R.id.maxButton).setSelected(false);
 					mRenderer.setVariable(5);
 				break;
 			case R.id.minButton:
-					findViewById(R.id.rotateButton).setSelected(false);
-					findViewById(R.id.alphaButton).setSelected(false);
-					findViewById(R.id.stepSizeButton).setSelected(false);
-					findViewById(R.id.numStepsButton).setSelected(false);
-					findViewById(R.id.minButton).setSelected(true);
-					findViewById(R.id.maxButton).setSelected(false);
 					mRenderer.setVariable(2);
 				break;
 			case R.id.maxButton:
-					findViewById(R.id.rotateButton).setSelected(false);
-					findViewById(R.id.alphaButton).setSelected(false);
-					findViewById(R.id.stepSizeButton).setSelected(false);
-					findViewById(R.id.numStepsButton).setSelected(false);
-					findViewById(R.id.minButton).setSelected(false);
-					findViewById(R.id.maxButton).setSelected(true);
 					mRenderer.setVariable(3);
 				break;
+		}		
+	}
+	
+	public void directionClick(View v)
+	{
+		float factor = 0.2f;
+		switch(v.getId()){
+		case R.id.ImageButton_down:
+				mRenderer.gridCamera.updateLocationForward(-factor);
+			break;
+		case R.id.ImageButton_up:
+				mRenderer.gridCamera.updateLocationForward(factor);
+			break;
+		case R.id.ImageButton_left:
+				mRenderer.gridCamera.updateLocationRight(-factor);
+			break;
+		case R.id.ImageButton_right:
+				mRenderer.gridCamera.updateLocationRight(factor);
+			break;	
+		}		
+	}
+	
+	public void setFPS(int fps)
+	{
+		TextView tv = (TextView) findViewById(R.id.fpsText);
+		String str = "FPS: ";
+		tv.setText(str + Integer.toString(fps));
+	}
+	
+	public void setGridNum(int gridNum)
+	{
+		TextView tv = (TextView) findViewById(R.id.gridNumText);
+		String str = "Grid#: ";
+		tv.setText(str + Integer.toString(gridNum));
+		
+		//Make sure the gridCamera is instantiated before query of its location
+		if(mRenderer.gridCamera != null)
+		{
+			tv = (TextView) findViewById(R.id.xText);
+			str = "X: ";
+			tv.setText(str + Float.toString(mRenderer.gridCamera.loc[0]));
+			
+			tv = (TextView) findViewById(R.id.yText);
+			str = "Y: ";
+			tv.setText(str + Float.toString(mRenderer.gridCamera.loc[1]));
+			
+			tv = (TextView) findViewById(R.id.zText);
+			str = "Z: ";
+			tv.setText(str + Float.toString(mRenderer.gridCamera.loc[2]));
 		}
 	}
 }
