@@ -22,7 +22,6 @@
 <fullyQualifiedTypeName name="android.content.Context"/>
 <fullyQualifiedTypeName name="android.opengl.EGLConfig"/>
 <fullyQualifiedTypeName name="javax.microedition.khronos.opengles.GL10"/>
-<fullyQualifiedTypeName name="android.opengl.Matrix"/>
 <fullyQualifiedTypeName name="android.opengl.GLES30"/>
 <fullyQualifiedTypeName name="java.nio.ByteBuffer"/>
 <fullyQualifiedTypeName name="java.io.File"/>
@@ -42,4 +41,5 @@
 <fullyQualifiedTypeName name="android.widget.TextView"/>
 <fullyQualifiedTypeName name="com.example.bvr.R.id"/>
 <fullyQualifiedTypeName name="android.os.Handler"/>
+<fullyQualifiedTypeName name="android.opengl.Matrix"/>
 </qualifiedTypeNameHistroy>

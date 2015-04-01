@@ -1,7 +1,0 @@
-package com.example.bvr;
-
-public class TouchEventVariables {
-	// These still work without volatile, but refreshes are not guaranteed to happen.					
-	public volatile float mDeltaX;					
-	public volatile float mDeltaY;	
-}
