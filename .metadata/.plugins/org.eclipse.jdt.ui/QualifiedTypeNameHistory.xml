@@ -42,4 +42,7 @@
 <fullyQualifiedTypeName name="com.example.bvr.R.id"/>
 <fullyQualifiedTypeName name="android.os.Handler"/>
 <fullyQualifiedTypeName name="android.opengl.Matrix"/>
+<fullyQualifiedTypeName name="com.example.bvr.GridDataCamera"/>
+<fullyQualifiedTypeName name="com.example.bvr.gridType"/>
+<fullyQualifiedTypeName name="com.example.bvr.GridDataCamera.gridType"/>
 </qualifiedTypeNameHistroy>

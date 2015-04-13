@@ -109,17 +109,11 @@ public class GridActivity extends Activity {
 	{
 		float factor = 0.2f;
 		switch(v.getId()){
-		case R.id.ImageButton_down:
-				mRenderer.gridCamera.updateLocationForward(-factor);
-			break;
 		case R.id.ImageButton_up:
-				mRenderer.gridCamera.updateLocationForward(factor);
-			break;
-		case R.id.ImageButton_left:
-				mRenderer.gridCamera.updateLocationRight(-factor);
-			break;
-		case R.id.ImageButton_right:
-				mRenderer.gridCamera.updateLocationRight(factor);
+			mRenderer.nextPoint = GridRenderer.gridCamera.nextGridPoint(mRenderer.loadedPoint, GridRenderer.gridPoints[mRenderer.loadedPoint], 1);
+		break;	
+		case R.id.ImageButton_down:
+				mRenderer.nextPoint = GridRenderer.gridCamera.nextGridPoint(mRenderer.loadedPoint, GridRenderer.gridPoints[mRenderer.loadedPoint], -1);
 			break;	
 		}		
 	}
