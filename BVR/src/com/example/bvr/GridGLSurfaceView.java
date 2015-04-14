@@ -35,6 +35,7 @@ public class GridGLSurfaceView extends GLSurfaceView
 
 	boolean multiTouch = false;
 	
+	
 	@Override
 	public boolean onTouchEvent(MotionEvent event) 
 	{

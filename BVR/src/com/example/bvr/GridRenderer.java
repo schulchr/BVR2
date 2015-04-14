@@ -8,6 +8,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -215,6 +216,20 @@ public class GridRenderer implements GLSurfaceView.Renderer {
 	private static float mZ = 0.0f;
 	private static float mZo = 1.0f;
 
+	
+	/**
+	 * to scale the data
+	 */
+	float scalex, scaley, scalez;
+	
+	/**
+	 * to use custom dimensions
+	 */
+	boolean useCustom = false;
+	int cXstart, cYstart, cZstart;
+	int cW, cH, cD;
+	int ctw, cth, ctd;
+	boolean customLoaded = false;
 	/**
 	 * Initialize the model data.
 	 */
@@ -652,13 +667,20 @@ public class GridRenderer implements GLSurfaceView.Renderer {
 				mLightPosInEyeSpace[1], mLightPosInEyeSpace[2]);
 
 		// choose which textures to load in here
-		if (mZoom >= 1.4)
-			setGridTextures();
-		else if (mZoom < 1.4 && mZoom >= 1.0)
-			mAndroidDataHandle[0] = loadDownscaled(-1);
-		else if (mZoom < 1.0)
-			mAndroidDataHandle[0] = loadDownscaled(-2);
-
+		if(!useCustom)
+		{
+			if (mZoom >= 1.4)
+				setGridTextures();
+			else if (mZoom < 1.4 && mZoom >= 1.0)
+				mAndroidDataHandle[0] = loadDownscaled(-1);
+			else if (mZoom < 1.0)
+				mAndroidDataHandle[0] = loadDownscaled(-2);
+		}
+		else
+		{
+			//load in the custom data
+			loadCustom();
+		}
 		// Pass in the texture information for each of the loaded in textures
 		for (int i = 0; i < 8; i++) {
 			// Set the active texture unit to texture unit 0.
@@ -1428,8 +1450,87 @@ public class GridRenderer implements GLSurfaceView.Renderer {
 		loadedPoint = type;
 
 		return textureId[0];
+		
+		
 	}
 
+	public int loadCustom() {
+		// already loaded in this custom data, don't do it again
+		if (customLoaded)
+			return mAndroidDataHandle[0];
+
+		// turn of the toggle for the grid
+		gridUsed = 0;
+
+		GLES30.glDeleteTextures(8, mAndroidDataHandle, 0);
+		// Texture object handle
+		int[] textureId = new int[1];
+		String filename = null;
+
+		filename = mFilename.substring(0, mFilename.length() - 5);
+
+		filename = filename.concat(".raw");
+		
+		// Read in the .raw file (binary file)
+		
+		byte[] bytes = new byte[cW * cH * cD];
+
+		
+		try {
+			RandomAccessFile file = new RandomAccessFile(filename, "r");
+			
+			for(int i = 0; i < cD; i++)		
+			{
+				for(int j = 0; j < cH; j++)
+				{
+					int offset = (ctw * cth * (cZstart + i)) + (ctw * (cYstart + j)) + cXstart;
+					
+					file.seek(offset);
+					int h = j * cW + i * cW * cH;
+					if(h + cW > cW * cD * cH)
+						i = i + 1;
+					file.read(bytes, h, cW);
+				}
+			}
+			
+		}
+		 catch (IOException ex) {
+
+		} 
+		
+		ByteBuffer pixelBuffer;
+		pixelBuffer = ByteBuffer.allocateDirect(bytes.length);
+		pixelBuffer.put(bytes).position(0);
+		
+
+		// Use tightly packed data
+		GLES30.glPixelStorei(GLES30.GL_UNPACK_ALIGNMENT, 1);
+
+		// Generate a texture object
+		GLES30.glGenTextures(1, textureId, 0);
+
+		// Bind the texture object
+		GLES30.glBindTexture(GLES30.GL_TEXTURE_3D, textureId[0]);
+
+		// Load the texture
+		GLES30.glTexImage3D(GLES30.GL_TEXTURE_3D, 0, GLES30.GL_R8, cW,
+				cH, cD, 0, GLES30.GL_RED, GLES30.GL_UNSIGNED_BYTE,
+				pixelBuffer);
+
+		// Set the filtering mode
+		GLES30.glTexParameteri(GLES30.GL_TEXTURE_3D,
+				GLES30.GL_TEXTURE_MIN_FILTER, GLES30.GL_NEAREST);
+		GLES30.glTexParameteri(GLES30.GL_TEXTURE_3D,
+				GLES30.GL_TEXTURE_MAG_FILTER, GLES30.GL_NEAREST);
+
+
+		customLoaded = true;
+		
+		return textureId[0];
+		
+	}
+	
+	
 	@Override
 	public void onSurfaceCreated(GL10 gl,
 			javax.microedition.khronos.egl.EGLConfig config) {

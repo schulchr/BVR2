@@ -11,6 +11,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.RadioButton;
 import android.widget.SeekBar;
@@ -26,6 +27,8 @@ public class GridActivity extends Activity {
 	private GridRenderer mRenderer;
 	private String filename;
 
+	public final static String EXTRA_MESSAGE = "com.example.bvr.MESSAGEGRID";
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -44,8 +47,25 @@ public class GridActivity extends Activity {
 		mRenderer = new GridRenderer(this, mGLSurfaceView);
 		mGLSurfaceView.setRenderer(mRenderer, displayMetrics.density);
 		mRenderer.setFilename(intent.getStringExtra(MainActivity.EXTRA_MESSAGE));
+		filename = intent.getStringExtra(MainActivity.EXTRA_MESSAGE);
+		Button picture;
 		
+		picture = (Button) findViewById(R.id.pictureButton);
 		
+		picture.setOnClickListener(new OnClickListener() {
+ 
+			@Override
+			public void onClick(View arg0) {
+				mRenderer.customLoaded = false;
+				mRenderer.useCustom = true;
+				Intent intent = new Intent(GridActivity.this, PicActivity.class);
+				intent.putExtra(EXTRA_MESSAGE, filename);
+				startActivityForResult(intent, 1);
+			}
+ 
+		});
+		
+
 		final Handler handler = new Handler();
 		
 		handler.post(new Runnable(){
@@ -63,14 +83,41 @@ public class GridActivity extends Activity {
 		});
 		
 	}
-
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data)
+	{
+		if(requestCode == 1)
+		{
+			if(resultCode == 1)
+			{
+				String result = data.getStringExtra("result");
+				
+				String[] split = result.split(" ");
+				mRenderer.cXstart = (int) Float.parseFloat(split[0]);
+				mRenderer.cYstart = (int) Float.parseFloat(split[1]);
+				mRenderer.cZstart = (int) Float.parseFloat(split[2]);
+				
+				mRenderer.cW = (int) Float.parseFloat(split[3]);
+				mRenderer.cH = (int) Float.parseFloat(split[4]);
+				mRenderer.cD = (int) Float.parseFloat(split[5]);
+				
+				mRenderer.ctw = (int) Float.parseFloat(split[6]);
+				mRenderer.cth = (int) Float.parseFloat(split[7]);
+				mRenderer.ctd = (int) Float.parseFloat(split[8]);
+				
+				mRenderer.useCustom = true;
+				mRenderer.customLoaded = false;
+			}
+		}
+	}
 	
 	@Override
 	protected void onResume() {
 		// The activity must call the GL surface view's onResume() on activity
 		// onResume().
 		super.onResume();
-		mGLSurfaceView.onResume();
+		//mGLSurfaceView.onResume();
 	}
 
 	@Override
@@ -78,7 +125,7 @@ public class GridActivity extends Activity {
 		// The activity must call the GL surface view's onPause() on activity
 		// onPause().
 		super.onPause();
-		mGLSurfaceView.onPause();
+		//mGLSurfaceView.onPause();
 	}
 	
 	public void radioClick(View v)

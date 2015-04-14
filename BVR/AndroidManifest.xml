@@ -34,6 +34,10 @@
             android:name=".GridActivity"
             android:label="Grid System" />
         
+        <activity
+            android:name=".PicActivity"
+            android:label="Picture View" />
+        
     </application>
 
 </manifest>
