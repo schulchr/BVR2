@@ -32,6 +32,16 @@ uniform float uDist;
 uniform float uLightToggle;
 uniform float uGrid;
 
+//box values
+uniform float umaxx;
+uniform float uminx;
+uniform float umaxy;
+uniform float uminy;
+uniform float umaxz;
+uniform float uminz;
+
+
+
 
 //This function will take a given global texture coordinate and translate it to the appropriate local texture coordinate
 float sampleTextures(vec3 tc)
@@ -182,6 +192,20 @@ void main()
 		
 		//Convert to color here
 		vec3 rgb = vec3(scalar, scalar, scalar);
+		
+		float minx, maxx;
+		float miny, maxy;
+		float minz, maxz;
+		minx = .25;
+		maxx = .75;
+		miny = .25;
+		maxy = .75;
+		minz = .25;
+		maxz = .75;
+		
+		if(uGrid == 1.0f && STP.x > uminx && STP.x < umaxx && STP.y > uminy && STP.y < umaxy && STP.z > uminz && STP.z < umaxz )
+			rgb *= vec3(1.0, 0.0, 0.0);
+		
 		
 		float alpha = uAmax;
 		

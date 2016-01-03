@@ -45,10 +45,15 @@ public class GridRenderer implements GLSurfaceView.Renderer {
 	static int gridTexWidth, gridTexHeight, gridTexDepth;
 	static GridDataCamera gridCamera;
 	static int loadedTextures[];
-	int loadedPoint = 87;
-	int nextPoint  = 87;
+	int loadedPoint = 21;
+	int nextPoint  = 21;
 	static int radius;
 	static float gridUsed = 0.0f;
+	static int fullWidth;
+
+	static int fullHeight;
+
+	static int fullDepth;
 	/**
 	 * Store the model matrix. This matrix is used to move models from object
 	 * space (where each model can be thought of being located at the center of
@@ -174,7 +179,7 @@ public class GridRenderer implements GLSurfaceView.Renderer {
 	private int mProgramHandle;
 
 	/** These are handles to our texture data. */
-	private int mAndroidDataHandle[] = new int[8];
+	private static int mAndroidDataHandle[] = new int[8];
 
 	// These still work without volatile, but refreshes are not guaranteed to
 	// happen.
@@ -200,6 +205,21 @@ public class GridRenderer implements GLSurfaceView.Renderer {
 	private int mZoomHandle;
 	private int mLightHandle;
 	private int mGridHandle;
+	
+	/** This will be used to pass in red box information. */
+	private int mmaxx;
+	private int mminx;
+	private int mmaxy;
+	private int mminy;
+	private int mmaxz;
+	private int mminz;
+	
+	float mmaxxv;
+	float mminxv;
+	float mmaxyv;
+	float mminyv;
+	float mmaxzv;
+	float mminzv;
 
 	/**
 	 * values that are passed into the shader
@@ -226,9 +246,9 @@ public class GridRenderer implements GLSurfaceView.Renderer {
 	 * to use custom dimensions
 	 */
 	boolean useCustom = false;
-	int cXstart, cYstart, cZstart;
-	int cW, cH, cD;
-	int ctw, cth, ctd;
+	float cXstart = 1, cYstart = 1, cZstart = 1;
+	float cW = 1, cH = 1, cD = 1;
+	float ctw = 1, cth = 1, ctd = 1;
 	boolean customLoaded = false;
 	/**
 	 * Initialize the model data.
@@ -578,7 +598,23 @@ public class GridRenderer implements GLSurfaceView.Renderer {
 				"uLightToggle");
 		mGridHandle = GLES30.glGetUniformLocation(mProgramHandle, "uGrid");
 		mZoomHandle = GLES30.glGetUniformLocation(mProgramHandle, "u_Zoom");
-
+		
+		mmaxx = GLES30.glGetUniformLocation(mProgramHandle, "umaxx");
+		mminx = GLES30.glGetUniformLocation(mProgramHandle, "uminx");
+		mmaxy = GLES30.glGetUniformLocation(mProgramHandle, "umaxy");
+		mminy = GLES30.glGetUniformLocation(mProgramHandle, "uminy");
+		mmaxz = GLES30.glGetUniformLocation(mProgramHandle, "umaxz");
+		mminz = GLES30.glGetUniformLocation(mProgramHandle, "uminz");
+		
+		// Send in all slider info
+		GLES30.glUniform1f(mmaxx, mmaxxv);
+		GLES30.glUniform1f(mminx, mminxv);
+		GLES30.glUniform1f(mmaxy, mmaxyv);
+		GLES30.glUniform1f(mminy, mminyv);
+		GLES30.glUniform1f(mmaxz, mmaxzv);
+		GLES30.glUniform1f(mminz, mminzv);
+		
+		
 		// Calculate position of the light. Push into the distance.
 		Matrix.setIdentityM(mLightModelMatrix, 0);
 		Matrix.translateM(mLightModelMatrix, 0, 0.0f, 0.0f, 1.0f);
@@ -984,24 +1020,10 @@ public class GridRenderer implements GLSurfaceView.Renderer {
 	 * points. This can be optimized with the
 	 */
 	public void setGridTextures() {
-		gridCamera.updateViewVolume();
 		gridUsed = 1.0f;
 		
-		/*
-		for (int i = 0; i < gridPoints.length; i++) {
-
-			if (gridCamera.isInsideView(gridPoints[i])) {
-				if (loadedPoint != i) {
-					loadedPoint = i;
-					loadGridTextures(gridPoints[i]);
-				}
-				return;
-			}
-
-		}
-		*/
-		
-		if (loadedPoint != nextPoint) {
+		if (loadedPoint != nextPoint)
+		{
 			loadedPoint = nextPoint;
 			loadGridTextures(gridPoints[loadedPoint]);
 		}
@@ -1013,16 +1035,24 @@ public class GridRenderer implements GLSurfaceView.Renderer {
 		// Just to get this working, reload all the textures.
 		// If it causes lag, then we'll deal with only loading what's needed.
 
+		// delete the textures that are goign to be swapped out so we don't run out of memory!
 		GLES30.glDeleteTextures(8, mAndroidDataHandle, 0);
 
-		for (int i = 0; i < 8; i++) {
+		for (int i = 0; i < 8; i++)
+		{
 			mAndroidDataHandle[i] = loadRaw(point.textures[i]);
 		}
-
 	}
-
+	
 	//
 	// loads in the raw file
+	//
+	// The reason why this loads in multiple files instead of one is for performance reasons.
+	// When loading in a file from the picture (select a region, render that selection), the user will be interested in that selected portion.
+	// While viewing the entirety of the volume and the user wants to go through the data, it makes more sense to have faster loading times. 
+	// The obvious drawback from this is the amount of storage is taken up on the device. Dataset size x 2 + lower res datasets can add up pretty quickly.
+	// The only issue with loading from a single, full data set is that it takes MANY more load calls than it does with only reading in 8, separate chunks.
+	// There's a lot of seek here, read in, copy memory over, rinse and repeat. It's not terrible, it's just hitchy enough that it could get annoying. 
 	//
 	public static int loadRaw(int fileNum) {
 		// Texture object handle
@@ -1449,11 +1479,16 @@ public class GridRenderer implements GLSurfaceView.Renderer {
 
 		loadedPoint = type;
 
-		return textureId[0];
-		
-		
+		return textureId[0];		
 	}
 
+	//
+	// Load in the custom texture selected by the user in the picture mode. As stated above in LoadRaw(), the reason why this is in separate chunks is because
+	// the load time isn't as big of an issue (going from one screen to another, an expected load time lag). It gives a good comparison between the two ways of
+	// doing it.
+	// 
+	// Also, this is a necessity for this aspect of the app, since you don't know what the user is going to select. 
+	//
 	public int loadCustom() {
 		// already loaded in this custom data, don't do it again
 		if (customLoaded)
@@ -1473,8 +1508,11 @@ public class GridRenderer implements GLSurfaceView.Renderer {
 		
 		// Read in the .raw file (binary file)
 		
-		byte[] bytes = new byte[cW * cH * cD];
-
+		byte[] bytes = new byte[(int)(cW * cH * cD)];
+		
+		/*
+		 * ctw/cth/ctd - custom texture height/width
+		 */
 		
 		try {
 			RandomAccessFile file = new RandomAccessFile(filename, "r");
@@ -1483,16 +1521,15 @@ public class GridRenderer implements GLSurfaceView.Renderer {
 			{
 				for(int j = 0; j < cH; j++)
 				{
-					int offset = (ctw * cth * (cZstart + i)) + (ctw * (cYstart + j)) + cXstart;
+					int offset = (int) ((ctw * cth * (cZstart + i)) + (ctw * (cYstart + j)) + cXstart);
 					
 					file.seek(offset);
-					int h = j * cW + i * cW * cH;
+					int h = (int) (j * cW + i * cW * cH);
 					if(h + cW > cW * cD * cH)
 						i = i + 1;
-					file.read(bytes, h, cW);
+					file.read(bytes, h, (int)cW);
 				}
 			}
-			
 		}
 		 catch (IOException ex) {
 
@@ -1513,8 +1550,8 @@ public class GridRenderer implements GLSurfaceView.Renderer {
 		GLES30.glBindTexture(GLES30.GL_TEXTURE_3D, textureId[0]);
 
 		// Load the texture
-		GLES30.glTexImage3D(GLES30.GL_TEXTURE_3D, 0, GLES30.GL_R8, cW,
-				cH, cD, 0, GLES30.GL_RED, GLES30.GL_UNSIGNED_BYTE,
+		GLES30.glTexImage3D(GLES30.GL_TEXTURE_3D, 0, GLES30.GL_R8, (int)cW,
+				(int)cH, (int)cD, 0, GLES30.GL_RED, GLES30.GL_UNSIGNED_BYTE,
 				pixelBuffer);
 
 		// Set the filtering mode
@@ -1526,11 +1563,22 @@ public class GridRenderer implements GLSurfaceView.Renderer {
 
 		customLoaded = true;
 		
+		//calculate new bounding boxes
+		mmaxxv = (cXstart + cW) / ctw;
+		mminxv = (cXstart) /ctw;
+		mmaxyv = (cYstart + cH) / cth;
+		mminyv = (cYstart) /cth;
+		mmaxzv = (cZstart + cD) / ctd;
+		mminzv = (cZstart) /ctd;
+		
+		
 		return textureId[0];
 		
 	}
 	
-	
+	/**
+	 * Make sure that everything is done on re-creation (ie, when app goes to sleep/out of focus of user then comes back)
+	 */
 	@Override
 	public void onSurfaceCreated(GL10 gl,
 			javax.microedition.khronos.egl.EGLConfig config) {
@@ -1603,20 +1651,13 @@ public class GridRenderer implements GLSurfaceView.Renderer {
 		gridCamera = new GridDataCamera(1.5f * lengthZ, 0.0f, .5f * lengthX,
 				.5f * lengthX, .75f * lengthY, .75f * lengthY);
 		
-		
-		
 		gridCamera.width = gridWidth;
 		gridCamera.height = gridHeight;
 		gridCamera.depth = gridDepth;
-		// gridCamera.updateLocation(0, 0, -1);
 
 		// choose which textures to load in here
 		if (mZoom >= 2.0)
 			setGridTextures();
-		// if(mZoom < 2.0 && mZoom >= 1.0)
-		// mAndroidDataHandle[0] = loadDownscaled(-1);
-		// if(mZoom < 1.0)
-		// load in small
 
 		// Initialize the accumulated rotation matrix
 		Matrix.setIdentityM(mAccumulatedRotation, 0);

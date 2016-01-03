@@ -257,8 +257,8 @@ public class PicActivity extends Activity {
 			}
 			if(bottom > image.getHeight())
 			{
-				top -= bottom - image.getWidth();
-				right = image.getWidth() - 1;
+				top   -= bottom - image.getHeight();
+				bottom = image.getHeight() - 1;
 			}
 			
 			tempCanvas.drawRect(left, top, right, bottom, rectPaint);

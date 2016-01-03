@@ -13,11 +13,13 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.RadioButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.example.bvr.R;
 
@@ -82,6 +84,22 @@ public class GridActivity extends Activity {
 			}
 		});
 		
+		ToggleButton toggle = (ToggleButton) findViewById(R.id.toggleButton1);
+		toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+		    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+		        if (isChecked) {
+		            // The toggle is enabled
+		        	mRenderer.useCustom = true;
+		        	mRenderer.loadedPoint = -5;
+		        } else {
+		            // The toggle is disabled
+		        	mRenderer.useCustom = false;
+		        	mRenderer.customLoaded = false;
+		        	mRenderer.loadDownscaled(-1);
+		        }
+		    }
+		});
+		
 	}
 	
 	@Override
@@ -108,6 +126,9 @@ public class GridActivity extends Activity {
 				
 				mRenderer.useCustom = true;
 				mRenderer.customLoaded = false;
+				
+				ToggleButton toggle = (ToggleButton) findViewById(R.id.toggleButton1);
+				toggle.setChecked(true);
 			}
 		}
 	}
