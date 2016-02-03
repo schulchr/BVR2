@@ -19,7 +19,7 @@
 		    android:id="@+id/pictureButton"
 		    android:layout_width="wrap_content"
 		    android:layout_height="wrap_content"
-		    android:text="Picture" />
+		    android:text="Slice" />
 
 		<ToggleButton
 		    android:id="@+id/toggleButton1"
@@ -32,9 +32,9 @@
 	</LinearLayout>
 	
 	<LinearLayout
-	    android:layout_width="152dp"
-	    android:layout_height="442dp"
-	    android:background="#ffffff"
+	    android:layout_width="wrap_content"
+	    android:layout_height="match_parent"
+	    android:background="#000000"
 	    android:orientation="vertical" >
 
 		<RadioGroup
@@ -47,35 +47,40 @@
 		        android:layout_width="wrap_content"
 		        android:layout_height="wrap_content"
 		        android:onClick="radioClick"
-		        android:text="Alpha" />
+		        android:text="Alpha"
+		        android:textColor="#ffffff" />
 
 		    <RadioButton
 		        android:id="@+id/minButton"
 		        android:layout_width="wrap_content"
 		        android:layout_height="wrap_content"
 		        android:onClick="radioClick"
-		        android:text="Min Value" />
+		        android:text="Min Value" 
+		        android:textColor="#ffffff"/>
 
 		    <RadioButton
 		        android:id="@+id/maxButton"
 		        android:layout_width="wrap_content"
 		        android:layout_height="wrap_content"
 		        android:onClick="radioClick"
-		        android:text="Max Value" />
+		        android:text="Max Value" 
+		        android:textColor="#ffffff"/>
 
 		    <RadioButton
 		        android:id="@+id/stepSizeButton"
 		        android:layout_width="wrap_content"
 		        android:layout_height="wrap_content"
 		        android:onClick="radioClick"
-		        android:text="Step Size" />
+		        android:text="Step Size" 
+		        android:textColor="#ffffff"/>
 
 		    <RadioButton
 		        android:id="@+id/numStepsButton"
 		        android:layout_width="wrap_content"
 		        android:layout_height="wrap_content"
 		        android:onClick="radioClick"
-		        android:text="Num Steps" />
+		        android:text="Num Steps" 
+		        android:textColor="#ffffff"/>
 
 		    <RadioButton
 		        android:id="@+id/rotateButton"
@@ -83,7 +88,8 @@
 		        android:layout_height="wrap_content"
 		        android:checked="true"
 		        android:onClick="radioClick"
-		        android:text="Rotate" />
+		        android:text="Rotate" 
+		        android:textColor="#ffffff"/>
 		</RadioGroup>
 
 	    <TextView
@@ -91,70 +97,77 @@
 	        android:layout_width="match_parent"
 	        android:layout_height="wrap_content"
 	        android:text="Values"
-	        android:textAppearance="?android:attr/textAppearanceSmall" />
+	        android:textAppearance="?android:attr/textAppearanceSmall" 
+		        android:textColor="#ffffff"/>
 
 	    <TextView
 	        android:id="@+id/fpsText"
 	        android:layout_width="match_parent"
 	        android:layout_height="wrap_content"
 	        android:text="FPS"
-	        android:textAppearance="?android:attr/textAppearanceSmall" />
+	        android:textAppearance="?android:attr/textAppearanceSmall"
+		        android:textColor="#ffffff" />
 
 	    <TextView
 	        android:id="@+id/xText"
 	        android:layout_width="match_parent"
 	        android:layout_height="wrap_content"
 	        android:text="X"
-	        android:textAppearance="?android:attr/textAppearanceSmall" />
+	        android:textAppearance="?android:attr/textAppearanceSmall"
+		        android:textColor="#ffffff" />
 
 	    <TextView
 	        android:id="@+id/yText"
 	        android:layout_width="match_parent"
 	        android:layout_height="wrap_content"
 	        android:text="Y"
-	        android:textAppearance="?android:attr/textAppearanceSmall" />
+	        android:textAppearance="?android:attr/textAppearanceSmall"
+		        android:textColor="#ffffff" />
 
 	    <TextView
 	        android:id="@+id/zText"
 	        android:layout_width="match_parent"
 	        android:layout_height="wrap_content"
 	        android:text="Z"
-	        android:textAppearance="?android:attr/textAppearanceSmall" />
+	        android:textAppearance="?android:attr/textAppearanceSmall"
+		        android:textColor="#ffffff" />
 
 	    <TextView
 	        android:id="@+id/gridNumText"
 	        android:layout_width="match_parent"
 	        android:layout_height="wrap_content"
 	        android:text="GridNum"
-	        android:textAppearance="?android:attr/textAppearanceSmall" />
+	        android:textAppearance="?android:attr/textAppearanceSmall"
+		        android:textColor="#ffffff" />
 
 	    <GridLayout
-	        android:layout_width="match_parent"
-	        android:layout_height="match_parent"
+	        android:layout_width="wrap_content"
+	        android:layout_height="149dp"
 	        android:background="#000000"
 	        android:columnCount="1" >
 
 	        <ImageButton
-	            android:id="@+id/ImageButton_up"
-	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content"
-	            android:layout_column="0"
-	            android:layout_gravity="center"
-	            android:layout_row="1"
-	            android:onClick="directionClick"
-	            android:src="@drawable/ic_button" />
-
-	        <ImageButton
 	            android:id="@+id/ImageButton_down"
-	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content"
+	            android:layout_width="match_parent"
+	            android:layout_height="61dp"
 	            android:layout_column="0"
-	            android:layout_gravity="center"
+	            android:layout_gravity="center_horizontal|bottom"
 	            android:layout_row="2"
 	            android:onClick="directionClick"
-	            android:src="@drawable/ic_button" />
+	            android:src="@drawable/down_button" />
+
+	        <ImageButton
+	            android:id="@+id/ImageButton_up"
+	            android:layout_width="match_parent"
+	            android:layout_height="62dp"
+	            android:layout_column="0"
+	            android:layout_gravity="left|top"
+	            android:layout_row="1"
+	            android:onClick="directionClick"
+	            android:src="@drawable/up_button" />
 
 	    </GridLayout>
+
 	</LinearLayout>
 
 	

@@ -16,6 +16,9 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
@@ -200,6 +203,8 @@ public class PicActivity extends Activity {
 
 		try {
 			RandomAccessFile file = new RandomAccessFile(filename+"raw", "r");
+			//RandomAccessFile file = new RandomAccessFile(filename+"raw", "r");
+			//RandomAccessFile file = new RandomAccessFile(filename+"raw", "r");
 			int offset = (tw * th * curZ);
 					
 			file.seek(offset);			
@@ -219,9 +224,9 @@ public class PicActivity extends Activity {
 		{
 			for(int x = 0; x < tw; x++)
 			{
-				int c = bytes[count++];
+				int c = bytes[count++];				
 				int color = (0xFF << 24) | (c << 16) | (c << 8) | c;
-				bmap.setPixel(x, th - 1 - y, color);
+				bmap.setPixel(x, th - 1 - y, Color.argb(255, c, c, c));
 			}
 		}
 		
@@ -269,7 +274,14 @@ public class PicActivity extends Activity {
 			rx2 = 0;
 		}
 		
+	    //ColorMatrix cm = new ColorMatrix();
+	    //cm.setSaturation(0);
+	    //ColorMatrixColorFilter f = new ColorMatrixColorFilter(cm);
+		
+	    //image.setColorFilter(f);
+	    
 		image.setImageDrawable(new BitmapDrawable(getResources(), bmap));
+		
 		
 	}
  

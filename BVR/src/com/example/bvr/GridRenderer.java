@@ -12,6 +12,8 @@ import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
+import java.nio.channels.FileChannel;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -705,9 +707,9 @@ public class GridRenderer implements GLSurfaceView.Renderer {
 		// choose which textures to load in here
 		if(!useCustom)
 		{
-			if (mZoom >= 1.4)
+			if (mZoom >= 1.1)
 				setGridTextures();
-			else if (mZoom < 1.4 && mZoom >= 1.0)
+			else if (mZoom < 1.1 && mZoom >= 1.0)
 				mAndroidDataHandle[0] = loadDownscaled(-1);
 			else if (mZoom < 1.0)
 				mAndroidDataHandle[0] = loadDownscaled(-2);
@@ -1382,7 +1384,13 @@ public class GridRenderer implements GLSurfaceView.Renderer {
 		// turn of the toggle for the grid
 		gridUsed = 0;
 
+		long maxmem = Runtime.getRuntime().maxMemory();
+		
+		
+		gridUsed = maxmem - maxmem;
+		
 		GLES30.glDeleteTextures(8, mAndroidDataHandle, 0);
+				
 		// Texture object handle
 		int[] textureId = new int[1];
 		String filename = null;
@@ -1395,6 +1403,7 @@ public class GridRenderer implements GLSurfaceView.Renderer {
 
 		int dim[] = new int[3];
 		int ratio[] = new int[3];
+		
 		// Read in the .dat file for data dimensions
 		try {
 			File file = new File(filename + ".dat");
@@ -1416,34 +1425,45 @@ public class GridRenderer implements GLSurfaceView.Renderer {
 			e.printStackTrace();
 		}
 
+
+		ByteBuffer pixelBuffer = ByteBuffer.allocateDirect(dim[0] * dim[1] * dim[2]);
+		//ByteBuffer pixelBuffer = ByteBuffer.allocateDirect(512 * 512 * 894);
+
+
 		// Read in the .raw file (binary file)
-		File file = new File(filename);
-		byte[] result = new byte[(int) file.length()];
+		RandomAccessFile file = null;
 		try {
-			InputStream input = null;
-			try {
-				int totalBytesRead = 0;
-				input = new BufferedInputStream(new FileInputStream(file));
-				while (totalBytesRead < result.length) {
-					int bytesRemaining = result.length - totalBytesRead;
-					// input.read() returns -1, 0, or more :
-					int bytesRead = input.read(result, totalBytesRead,
-							bytesRemaining);
-					if (bytesRead > 0) {
-						totalBytesRead = totalBytesRead + bytesRead;
-					}
-				}
-
-			} finally {
-				input.close();
+			file = new RandomAccessFile(filename, "r");
+		} catch (FileNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		FileChannel inChannel = file.getChannel();
+		
+		//byte[] result = new byte[(int) file.length()];
+		try {
+				int bytesRead = inChannel.read(pixelBuffer);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-		} catch (FileNotFoundException ex) {
-
-		} catch (IOException ex) {
-
+		finally{
+			try {
+				file.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 
-		ByteBuffer pixelPad, pixelBuffer;
+		try {
+			file.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		//ByteBuffer pixelPad, pixelBuffer;
 		int width, height, depth;
 
 		// If the data is needing padding in the z direction
@@ -1451,8 +1471,8 @@ public class GridRenderer implements GLSurfaceView.Renderer {
 		float highEndRatio = (float) (ratio[2] + .1);
 		float lowEndRatio = (float) (ratio[2] - .1);
 
-		pixelBuffer = ByteBuffer.allocateDirect(result.length);
-		pixelBuffer.put(result).position(0);
+		//pixelBuffer = ByteBuffer.allocateDirect(512 * 512 * 894);
+		pixelBuffer.position(0);
 		width = dim[0];
 		height = dim[1];
 		depth = dim[2];
@@ -1478,6 +1498,7 @@ public class GridRenderer implements GLSurfaceView.Renderer {
 				GLES30.GL_TEXTURE_MAG_FILTER, GLES30.GL_NEAREST);
 
 		loadedPoint = type;
+		
 
 		return textureId[0];		
 	}
@@ -1571,6 +1592,7 @@ public class GridRenderer implements GLSurfaceView.Renderer {
 		mmaxzv = (cZstart + cD) / ctd;
 		mminzv = (cZstart) /ctd;
 		
+	
 		
 		return textureId[0];
 		
